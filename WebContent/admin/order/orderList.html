@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../js/css/layui.css">
+		<script type="text/javascript" src="../js/layui.js"></script>
+		<script>
+			layui.use('table', function(){
+				  var table = layui.table;
+				  
+				  //第一个实例
+				  table.render({
+				    elem: '#cartData'
+				    ,url: '../../orderServlet' //数据接口
+				    ,page: true //开启分页
+				    ,cols: [[ //表头
+				      {field: 'id', title: '购物车ID', width:'20%', sort: true}
+				      ,{field: 'userid', title: '用户ID', width:'20%'}
+				      ,{field: 'productid', title: '产品ID', width:'20%'}
+				      ,{field: 'status', title: '状态', width:'20%'}
+				      ,{field: 'operation', title: '操作', width:'20%',toolbar: '#operation'}
+				    ]]
+				  });
+				  
+				});
+		</script>
+</head>
+<body>
+	<table id="cartData" lay-filter="test"></table>
+	
+	<script type="text/html" id="operation">
+    	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</ a>
+	</script>
+	
+	<script type="text/javascript">
+		layui.use(['table','form'], function(){
+			  var table = layui.table;
+			  var form = layui.form;
+			  var $ = layui.$;
+			  table.on('tool(test)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+			      var data = obj.data; //获得当前行数据
+			      var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+			      var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+			      if(layEvent === 'del'){ //删除
+			            layer.confirm('真的删除ID：'+data.id+"吗?", function(index){
+			            
+			                //向服务端发送删除指令
+			                    $.ajax({
+			                        url:'../../orderServlet',
+			                        type:'post',
+			                        data:{'id':data.id,'op':"del"},//向服务端发送删除的id
+			                        dataType:'json',
+			                        success:function(data){
+			                        	var suc = data.code;
+			                            if(suc==200){
+			                                obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+			                                layer.close(index);
+			                                console.log(index);
+			                                location.href = "orderList.html";
+			                            }
+			                        }
+			                    });
+			                    layer.close(index); 
+			                });
+			              
+			      }
+			    });
+			});
+		</script>
+</body>
+</html>
